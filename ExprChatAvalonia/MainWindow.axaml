@@ -1,0 +1,137 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="768"
+		x:Class="ExprChatAvalonia.MainWindow"
+		Title="ExprChatAvalonia"
+		Width="1080" Height="768"
+		ExtendClientAreaToDecorationsHint="True">
+	<Grid RowDefinitions="auto, *, auto">
+		<TextBlock Height="32" LineHeight="32" Padding="16,0,0,0" Background="#333" Foreground="#ccc" PointerPressed="TextBlock_PointerPressed" Text="Expressive Chat"/>
+		
+		<TabControl Name="TabControlPages" Grid.Row="1" Margin="32, 0" Padding="0, 32" SelectionChanged="TabControl_SelectionChanged">
+			<TabItem Header="💬 Chat" Cursor="Hand">
+				<Grid RowDefinitions="*, Auto" RowSpacing="32">
+					<Grid RowDefinitions="*, *" ColumnDefinitions="*, *" ColumnSpacing="16">
+						<Image Name="ImageChar" Grid.RowSpan="2" Cursor="Hand" PointerPressed="ImageChar_PointerPressed"/>
+						<Border IsVisible="False" Name="BorderDialog" Grid.Column="1" Background="White" BorderBrush="Gray" BorderThickness="1" CornerRadius="16" Padding="16" VerticalAlignment="Bottom">
+							<TextBlock Name="TextBlockDialog" Foreground="Black" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
+						</Border>
+						<TextBlock Name="TextBlockAction" Grid.Column="1" Grid.Row="1" Padding="16" VerticalAlignment="Top" Foreground="Gray" FontStyle="Italic" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
+					</Grid>
+					<Grid ColumnDefinitions="*, 0.74*, auto, auto" Grid.Row="1" ColumnSpacing="8" Margin="32, 0">
+						<TextBox Name="TextBoxInput" Grid.Column="0" VerticalContentAlignment="Center" Watermark="Dialog..." KeyDown="TextBoxInput_KeyDown"/>
+						<TextBox Name="TextBoxInputAct" Grid.Column="1" Opacity="0.7" VerticalContentAlignment="Center" Watermark="Action..." KeyDown="TextBoxInput_KeyDown"/>
+						<Button Name="ButtonSend" Grid.Column="2" Padding="8" Content="Send 🔼" Cursor="Hand" Click="ButtonSend_Click"/>
+						<Button Name="ButtonRetry" Grid.Column="3" Padding="8" Content="🔄" Cursor="Hand" Click="ButtonRetry_Click"/>
+					</Grid>
+				</Grid>
+			</TabItem>
+			<TabItem Header="📃 Context" Cursor="Hand">
+				<Grid RowDefinitions="*, auto" RowSpacing="16">
+					<TextBox Name="TextBoxContext" AcceptsReturn="True" Watermark="Chat history..." TextWrapping="WrapWithOverflow" TextChanged="TextBoxContext_TextChanged"/>
+					<StackPanel Grid.Row="1" Orientation="Horizontal" FlowDirection="RightToLeft" Spacing="8">
+						<Button Name="ButtonGen" Content="Continue" Click="ButtonGen_Click"/>
+						<Button Name="ButtonRegen" Content="Retry" Click="ButtonRegen_Click"/>
+					</StackPanel>
+				</Grid>
+			</TabItem>
+			<TabItem Header="📚 Scenario" Cursor="Hand">
+				<Grid ColumnDefinitions="*, 2*, 3*" RowDefinitions="auto, *, auto, *, auto, 2*" ColumnSpacing="16" RowSpacing="16">
+					<TextBlock Grid.Column="0" Grid.Row="0" Text="User name" FontSize="20" HorizontalAlignment="Center"/>
+					<TextBox Name="TextBoxUserName" Grid.Column="0" Grid.Row="1" Watermark="User" TextWrapping="WrapWithOverflow" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="TextBoxUserName_TextChanged"/>
+					<TextBlock Grid.Column="0" Grid.Row="2" Text="Character name" FontSize="20" HorizontalAlignment="Center" Margin="0, 16, 0, 0"/>
+					<TextBox Name="TextBoxCharName" Grid.Column="0" Grid.Row="3" Watermark="AI" TextWrapping="WrapWithOverflow" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" TextChanged="TextBoxCharName_TextChanged"/>
+					<TextBlock Grid.Column="1" Grid.Row="0" Text="User description" FontSize="20" HorizontalAlignment="Center"/>
+					<TextBox Name="TextBoxUserDesc" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" Watermark="Describe your persona..." TextWrapping="WrapWithOverflow" AcceptsReturn="True" Padding="16" TextChanged="TextBoxUserDesc_TextChanged"/>
+					<TextBlock Grid.Column="2" Grid.Row="0" Text="Character description" FontSize="20" HorizontalAlignment="Center"/>
+					<TextBox Name="TextBoxCharDesc" Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" Watermark="Describe AI's character..." TextWrapping="WrapWithOverflow" AcceptsReturn="True" Padding="16" TextChanged="TextBoxCharDesc_TextChanged"/>
+					<TextBlock Grid.ColumnSpan="2" Grid.Row="4" Text="Scenario" FontSize="20" HorizontalAlignment="Center" Margin="0, 16, 0, 0"/>
+					<TextBox Name="TextBoxScenario" Grid.ColumnSpan="2" Grid.Row="5" Watermark="Describe the premise of this chat..." TextWrapping="WrapWithOverflow" AcceptsReturn="True" Padding="16" TextChanged="TextBoxScenario_TextChanged"/>
+					<TextBlock Grid.ColumnSpan="1" Grid.Row="4" Grid.Column="2" Text="Dialog examples" FontSize="20" HorizontalAlignment="Center" Margin="0, 16, 0, 0"/>
+					<TextBox Name="TextBoxExamples" Grid.ColumnSpan="1" Grid.Row="5" Grid.Column="2" Watermark="Write dialog examples..." TextWrapping="WrapWithOverflow" AcceptsReturn="True" Padding="16" TextChanged="TextBoxExamples_TextChanged"/>
+				</Grid>
+			</TabItem>
+			<TabItem Header="🎛 Sampler" Cursor="Hand">
+				<ScrollViewer MaxWidth="1080">
+					<Grid ColumnDefinitions="*, 150, 0.1*, *, 150" RowDefinitions="auto, auto, auto, auto, auto, auto, auto, auto" ColumnSpacing="16" RowSpacing="8">
+						<TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Text="Context size" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderContext" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Minimum="512" Maximum="8192" Value="4096" SmallChange="512" LargeChange="1024" TickPlacement="BottomRight" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="SliderContext_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownContext" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Minimum="512" Maximum="8192" Value="4096" Increment="512" ValueChanged="NumericUpDownContext_ValueChanged"/>
+						<TextBlock Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2" Text="Output length" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderOutput" Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Minimum="32" Maximum="256" Value="64" SmallChange="32" LargeChange="64" TickPlacement="BottomRight" TickFrequency="32" IsSnapToTickEnabled="True" ValueChanged="SliderOutput_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownOutput" Grid.Column="4" Grid.Row="1" VerticalAlignment="Center" Minimum="32" Maximum="256" Value="64" Increment="32" ValueChanged="NumericUpDownOutput_ValueChanged"/>
+						<TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Text="Temperature" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderTemp" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0.3" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderTemp_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownTemp" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0.3" Increment="0.1" ValueChanged="NumericUpDownTemp_ValueChanged"/>
+						<TextBlock Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2" Text="Repetition penalty" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderRepPen" Grid.Column="3" Grid.Row="3" VerticalAlignment="Center" Minimum="1" Maximum="2" Value="1.1" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderRepPen_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownRepPen" Grid.Column="4" Grid.Row="3" VerticalAlignment="Center" Minimum="1" Maximum="2" Value="1.1" Increment="0.1" ValueChanged="NumericUpDownRepPen_ValueChanged"/>
+						<TextBlock Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Text="Top-P sampling" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderTopP" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="1" Value="0.9" SmallChange="0.05" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="SliderTopP_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownTopP" Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="1" Value="0.9" Increment="0.05" ValueChanged="NumericUpDownTopP_ValueChanged"/>
+						<TextBlock Grid.Column="3" Grid.Row="4" Grid.ColumnSpan="2" Text="Top-K sampling" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderTopK" Grid.Column="3" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="100" SmallChange="5" LargeChange="10" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderTopK_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownTopK" Grid.Column="4" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="100" Increment="5" ValueChanged="NumericUpDownTopK_ValueChanged"/>
+						<TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2" Text="Top N Sigma" FontSize="20" Padding="0, 32, 0, 0"/>
+						<Slider Name="SliderNSigma" Grid.Column="0" Grid.Row="7" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderNSigma_ValueChanged"/>
+						<NumericUpDown Name="NumericUpDownNSigma" Grid.Column="1" Grid.Row="7" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0" Increment="0.1" ValueChanged="NumericUpDownNSigma_ValueChanged"/>
+					</Grid>
+				</ScrollViewer>
+			</TabItem>
+			<TabItem Header="⚙ Settings" Cursor="Hand">
+				<ScrollViewer MaxWidth="768">
+					<StackPanel Spacing="16">
+						<Grid ColumnDefinitions="*, *" RowDefinitions="auto, auto, auto" RowSpacing="16" Margin="0, 32, 0, 0">
+							<TextBlock Grid.Row="0" Text="Portraits folder" FontSize="20"/>
+							<Button Grid.Row="0" Grid.Column="1" Content="Select" FontSize="20" HorizontalAlignment="Right" MinWidth="100" HorizontalContentAlignment="Center" Click="ButtonFolder_Click"/>
+							<TextBlock Grid.Row="1" Text="Selected character" FontSize="20"/>
+							<ComboBox Name="ComboBoxChar" Grid.Row="1" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" MinWidth="100" IsEnabled="False" PlaceholderForeground="Gray" SelectionChanged="ComboBoxChar_SelectionChanged"/>
+							<TextBlock Name="TextBlockIcons" Grid.Row="2" Grid.ColumnSpan="2" FontSize="16" TextWrapping="WrapWithOverflow" Foreground="Gray"/>
+						</Grid>
+						<Border Height="64"/>
+						<TextBlock Text="API Provider" FontSize="20"/>
+						<TabControl Name="TabControlProvider" TabStripPlacement="Left">
+							<TabItem Header="Local">
+								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" VerticalAlignment="Top">
+									<TextBlock Name="TextBlockLocal" FontSize="20" Foreground="Gray" Margin="16"/>
+								</Border>
+							</TabItem>
+							<TabItem Header="AI Horde">
+								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+									<Grid ColumnDefinitions="160, *" RowDefinitions="*, *, *" RowSpacing="16" Margin="16">
+										<TextBlock Grid.Row="0" Text="Selected model" FontSize="20"/>
+										<ComboBox Name="ComboBoxModel" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" MinWidth="320" SelectionChanged="ComboBoxModel_SelectionChanged" PlaceholderText="Select model..." PlaceholderForeground="Gray" AutoScrollToSelectedItem="True">
+											<ComboBox.Styles>
+												<Style Selector="ComboBoxItem">
+													<Setter Property="Width" Value="320"/>
+													<Setter Property="FontSize" Value="14"/>
+												</Style>
+											</ComboBox.Styles>
+										</ComboBox>
+										<TextBlock Grid.Row="1" Text="API key" FontSize="20"/>
+										<TextBox Name="TextBoxApi" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" MinWidth="320" Watermark="0000000000" Text="" KeyDown="TextBoxApi_KeyDown"/>
+										<TextBlock Name="TextBlockUser" Grid.Row="2" Grid.ColumnSpan="2" FontSize="20" Foreground="Gray"/>
+										<TextBlock Name="TextBlockKudos" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" FontSize="20" Foreground="Gray" FontStyle="Italic"/>
+									</Grid>
+								</Border>
+							</TabItem>
+						</TabControl>
+					</StackPanel>
+				</ScrollViewer>
+			</TabItem>
+		</TabControl>
+		<ProgressBar Name="ProgressBarStat" Grid.Row="2" Height="17" Opacity="0" IsIndeterminate="True" CornerRadius="0"/>
+	</Grid>
+
+	<FlyoutBase.AttachedFlyout>
+		<Flyout Placement="Center">
+			<StackPanel Margin="8" Spacing="16" MaxWidth="400">
+				<TextBlock Name="InfoBoxTitle" FontWeight="Bold" FontSize="16" TextWrapping="Wrap"/>
+				<TextBlock Name="InfoBoxBody" FontSize="16" TextWrapping="Wrap"/>
+				<Button Name="ButtonCloseFlyout" Content="Okay" HorizontalAlignment="Center" Click="ButtonCloseFlyout_Click"/>
+			</StackPanel>
+		</Flyout>
+	</FlyoutBase.AttachedFlyout>
+</Window>

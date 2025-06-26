@@ -1,0 +1,20 @@
+<Application xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 x:Class="ExprChatAvalonia.App"
+			 RequestedThemeVariant="Default">
+			 <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+	<Application.Styles>
+		<FluentTheme/>
+		<Style Selector="Window">
+			<Setter Property="FontFamily" Value="Bahnschrift"/>
+		</Style>
+		<Style Selector="FlyoutPresenter">
+			<Setter Property="BorderBrush" Value="Gray"/>
+			<Setter Property="BorderThickness" Value="2"/>
+		</Style>
+		<Style Selector="TextBox, Button, ComboBox">
+			<Setter Property="FontSize" Value="16"/>
+		</Style>
+	</Application.Styles>
+</Application>
