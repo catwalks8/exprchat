@@ -1,18 +1,14 @@
-﻿using HarfBuzzSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Net;
+using System.Text.Json;
 using Avalonia.Media.Imaging;
 using System.IO;
-using Avalonia.Markup.Xaml.MarkupExtensions;
-using Avalonia.Media;
+using System.Text.Json.Nodes;
 
 namespace ExprChatAvalonia {
 	public struct SamplerConfig {
@@ -51,7 +47,7 @@ namespace ExprChatAvalonia {
 		public static string imagesDir = @"";
 		public static string selectedFolder = "";
 		public static Dictionary<string, Bitmap> icons = new Dictionary<string, Bitmap>();
-		public static string apiKey = "0000000000l";
+		public static string apiKey = "0000000000";
 		public static string model = "";
 		public static bool useHorde = false;
 		public enum reqStat {
@@ -62,28 +58,28 @@ namespace ExprChatAvalonia {
 
 		public static async Task<string> KoboldCppGen(string con = "", string mem = "", int len = 128, double temp = 0, string gbnf = "") {
 			rs = reqStat.Waiting;
-			HttpClient client = new HttpClient();
-			var payload = new {
-				max_context_length = config.contextSize,
-				max_length = len,
-				memory = mem,
-				prompt = con,
-				quiet = true,
-				grammar = gbnf,
-				stop_sequence = new string[] { "\r", "\n" },
-				rep_pen = config.repetitionPenalty,
-				rep_pen_range = 384,
-				rep_pen_slope = 0.8,
-				temperature = temp,
-				tfs = 1,
-				top_a = 0,
-				top_k = config.topK,
-				top_p = config.topP,
-				typical = 1,
-				nsigma = config.tnsigma
+			using HttpClient client = new HttpClient();
+			var payload = new JsonObject {
+				["max_context_length"] = config.contextSize,
+				["max_length"] = len,
+				["memory"] = mem,
+				["prompt"] = con,
+				["quiet"] = true,
+				["grammar"] = gbnf,
+				["stop_sequence"] = new JsonArray("\r", "\n"),
+				["rep_pen"] = config.repetitionPenalty,
+				["rep_pen_range"] = 384,
+				["rep_pen_slope"] = 0.8,
+				["temperature"] = temp,
+				["tfs"] = 1,
+				["top_a"] = 0,
+				["top_k"] = config.topK,
+				["top_p"] = config.topP,
+				["typical"] = 1,
+				["nsigma"] = config.tnsigma
 			};
 
-			string jsonPayload = JsonConvert.SerializeObject(payload);
+			string jsonPayload = payload.ToJsonString();
 
 			StringContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
@@ -93,36 +89,36 @@ namespace ExprChatAvalonia {
 			response.EnsureSuccessStatusCode();
 
 			string responseContent = await response.Content.ReadAsStringAsync();
-			dynamic obj = JsonConvert.DeserializeObject(responseContent);
-			rs = reqStat.Idle;
+            var doc = JsonDocument.Parse(responseContent);
+            rs = reqStat.Idle;
 
-			return obj.results[0].text.ToString();
-		}
+			return doc.RootElement.GetProperty("results")[0].GetProperty("text").GetString();
+        }
 
         public static async Task<string> HordeGen(string prompt = "") {
 			rs = reqStat.Waiting;
-			HttpClient client = new HttpClient();
-            var payload = new {
-				prompt = prompt,
-				@params = new {
-					max_context_length = config.contextSize,
-					max_length = config.outputLength,
-					stop_sequence = new string[] { "\r", "\n" },
-					rep_pen = config.repetitionPenalty,
-					rep_pen_range = 384,
-					rep_pen_slope = 0.8,
-					temperature = config.temperature,
-					tfs = 1,
-					top_a = 0,
-					top_k = config.topK,
-					top_p = config.topP,
-					typical = 1,
-					nsigma = config.tnsigma
+			using HttpClient client = new HttpClient();
+			var payload = new JsonObject {
+				["prompt"] = prompt,
+				["params"] = new JsonObject {
+					["max_context_length"] = config.contextSize,
+					["max_length"] = config.outputLength,
+					["stop_sequence"] = new JsonArray("\r", "\n"),
+					["rep_pen"] = config.repetitionPenalty,
+					["rep_pen_range"] = 384,
+					["rep_pen_slope"] = 0.8,
+					["temperature"] = config.temperature,
+					["tfs"] = 1,
+					["top_a"] = 0,
+					["top_k"] = config.topK,
+					["top_p"] = config.topP,
+					["typical"] = 1,
+					["nsigma"] = config.tnsigma
 				},
-				models = new string[] { model }
-            };
+				["models"] = new JsonArray(model)
+			};
 
-            string jsonPayload = JsonConvert.SerializeObject(payload);
+			string jsonPayload = payload.ToJsonString();
             StringContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://aihorde.net/api/v2/generate/text/async");
@@ -135,9 +131,9 @@ namespace ExprChatAvalonia {
             response.EnsureSuccessStatusCode();
 
             string responseContent = await response.Content.ReadAsStringAsync();
-            dynamic obj = JsonConvert.DeserializeObject(responseContent);
+            var doc = JsonDocument.Parse(responseContent);
 
-			string jobID = obj.id;
+            string jobID = doc.RootElement.GetProperty("id").GetString();
 
 			while (true) {
 				Task.Delay(1000);
@@ -147,21 +143,21 @@ namespace ExprChatAvalonia {
 
                 response = await client.SendAsync(statusRequest);
                 responseContent = await response.Content.ReadAsStringAsync();
-                obj = JsonConvert.DeserializeObject(responseContent);
+                doc = JsonDocument.Parse(responseContent);
 
-				if (obj.waiting == 1) {
+                if (doc.RootElement.GetProperty("waiting").GetInt32() == 1) {
 					rs = reqStat.Queued;
-					rt = obj.queue_position;
-                } else if (obj.processing == 1) {
-					rs = reqStat.Processing;
-					rt = obj.wait_time;
-				} else if (obj.finished == 1) {
-					rs = reqStat.Idle;
+					rt = doc.RootElement.GetProperty("queue_position").GetInt32();
+                } else if (doc.RootElement.GetProperty("processing").GetInt32() == 1) {
+                    rs = reqStat.Processing;
+					rt = doc.RootElement.GetProperty("wait_time").GetInt32();
+				} else if (doc.RootElement.GetProperty("finished").GetInt32() == 1) {
+                    rs = reqStat.Idle;
 					break;
 				}
             }
 
-            return obj.generations[0].text.ToString();
+            return doc.RootElement.GetProperty("generations")[0].GetProperty("text").GetString();
         }
 
         public static async Task GenerateResponse() {
@@ -172,7 +168,7 @@ namespace ExprChatAvalonia {
 			} else {
 				msg = await KoboldCppGen(context, memory, config.outputLength, config.temperature);
 			}
-			msg = Regex.Match(msg, @"^[^\|]+(?:\|[^\|]+)?").Value;
+			msg = Regex.Match(msg, @"^[^\|]+(?:\|[^\|]+)?").Value.TrimEnd();
 			context += msg;
 			lastPos.post = context.Length;
 		}
@@ -190,6 +186,7 @@ namespace ExprChatAvalonia {
 		public static async Task<string> GenerateExpression() {
 			if (icons.Count == 0) return "";
 			string msg = Regex.Matches(context, $"{story.charName}: (.*)").Last().Groups[1].Value;
+			// make exprTask a template and only replace the variable parts right here
 			return await KoboldCppGen($"{context}\n</conversation>\n\n\n{exprTask.Replace("[MESSAGE]", msg)}", useHorde ? "" : memory, 8, 0.0, gbnf);
 		}
 
@@ -205,9 +202,9 @@ namespace ExprChatAvalonia {
 			if (!response.IsSuccessStatusCode) return null;
 
             string responseContent = await response.Content.ReadAsStringAsync();
-            dynamic obj = JsonConvert.DeserializeObject(responseContent);
+            var doc = JsonDocument.Parse(responseContent);
 
-            return obj.result.ToString();
+			return doc.RootElement.GetProperty("result").GetString();
 		}
 
 		public static async Task<(string? name, int kudos)> GetHordeUser(string api) {
@@ -226,10 +223,10 @@ namespace ExprChatAvalonia {
             if (!response.IsSuccessStatusCode) return (name: null, kudos: 0);
 
             string responseContent = await response.Content.ReadAsStringAsync();
-            dynamic obj = JsonConvert.DeserializeObject(responseContent);
+            var doc = JsonDocument.Parse(responseContent);
 
-			return (name: obj.username, kudos: obj.kudos);
-		}
+            return (name: doc.RootElement.GetProperty("username").GetString(), kudos: (int)doc.RootElement.GetProperty("kudos").GetDouble());
+        }
 
 		public static async Task<List<string>> GetHordeModels() {
 			List<string> models = new List<string>();
@@ -245,10 +242,10 @@ namespace ExprChatAvalonia {
             if (!response.IsSuccessStatusCode) return models;
 
             string responseContent = await response.Content.ReadAsStringAsync();
-            dynamic obj = JsonConvert.DeserializeObject(responseContent);
+            var doc = JsonDocument.Parse(responseContent);
 
-			for (int i = 0; i < obj?.Count; i++) {
-				models.Add(obj[i].name.ToString());
+			for (int i = 0; i < doc.RootElement.GetArrayLength(); i++) {
+				models.Add(doc.RootElement[i].GetProperty("name").GetString());
 			}
 			
             return models;

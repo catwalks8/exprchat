@@ -20,10 +20,10 @@
 						</Border>
 						<TextBlock Name="TextBlockAction" Grid.Column="1" Grid.Row="1" Padding="16" VerticalAlignment="Top" Foreground="Gray" FontStyle="Italic" FontSize="20" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
 					</Grid>
-					<Grid ColumnDefinitions="*, 0.74*, auto, auto" Grid.Row="1" ColumnSpacing="8" Margin="32, 0">
+					<Grid ColumnDefinitions="*, 0.7*, 100, auto" Grid.Row="1" ColumnSpacing="8" Margin="32, 0">
 						<TextBox Name="TextBoxInput" Grid.Column="0" VerticalContentAlignment="Center" Watermark="Dialog..." KeyDown="TextBoxInput_KeyDown"/>
 						<TextBox Name="TextBoxInputAct" Grid.Column="1" Opacity="0.7" VerticalContentAlignment="Center" Watermark="Action..." KeyDown="TextBoxInput_KeyDown"/>
-						<Button Name="ButtonSend" Grid.Column="2" Padding="8" Content="Send 🔼" Cursor="Hand" Click="ButtonSend_Click"/>
+						<Button Name="ButtonSend" Grid.Column="2" Padding="8" HorizontalAlignment="Right" Content="Send 🔼" Cursor="Hand" Click="ButtonSend_Click"/>
 						<Button Name="ButtonRetry" Grid.Column="3" Padding="8" Content="🔄" Cursor="Hand" Click="ButtonRetry_Click"/>
 					</Grid>
 				</Grid>
