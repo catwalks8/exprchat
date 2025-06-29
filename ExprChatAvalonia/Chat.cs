@@ -9,6 +9,8 @@ using System.Text.Json;
 using Avalonia.Media.Imaging;
 using System.IO;
 using System.Text.Json.Nodes;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Media;
 
 namespace ExprChatAvalonia {
 	public struct SamplerConfig {
@@ -41,7 +43,7 @@ namespace ExprChatAvalonia {
 		public static string context = "";
 		public static string gbnf = "";
 		public static string chatTask = "Your task is naturally continuing the conversation below between the characters.\n\n- Write the character speech and actions, separated by a vertical line.\n- The action description is optional, can be omitted if not important.\n- For a silent action, write `...` in place of the speech.\n- Dialogue always comes before the action description.\n- Don't use asterisks.";
-		public static string exprTask = "";
+		public static string exprTask = "### Instruction\nDetermine {char}'s latest facial expression, based on their last response.\nPossible expressions: [{expr}]\n\n### Response\nFor {char} saying \"{msg}\", the most fitting expression is \"";
 		public static (int pre, int post) lastPos = (0, 0);
 
 		public static string imagesDir = @"";
@@ -55,6 +57,7 @@ namespace ExprChatAvalonia {
 		}
 		public static reqStat rs = reqStat.Idle;
 		public static int rt = 0;
+		public static string jobID = "";
 
 		public static async Task<string> KoboldCppGen(string con = "", string mem = "", int len = 128, double temp = 0, string gbnf = "") {
 			rs = reqStat.Waiting;
@@ -76,8 +79,9 @@ namespace ExprChatAvalonia {
 				["top_k"] = config.topK,
 				["top_p"] = config.topP,
 				["typical"] = 1,
-				["nsigma"] = config.tnsigma
-			};
+				["nsigma"] = config.tnsigma,
+				["genkey"] = "KCPP7370"
+            };
 
 			string jsonPayload = payload.ToJsonString();
 
@@ -133,7 +137,7 @@ namespace ExprChatAvalonia {
             string responseContent = await response.Content.ReadAsStringAsync();
             var doc = JsonDocument.Parse(responseContent);
 
-            string jobID = doc.RootElement.GetProperty("id").GetString();
+            jobID = doc.RootElement.GetProperty("id").GetString();
 
 			while (true) {
 				Task.Delay(1000);
@@ -145,16 +149,22 @@ namespace ExprChatAvalonia {
                 responseContent = await response.Content.ReadAsStringAsync();
                 doc = JsonDocument.Parse(responseContent);
 
-                if (doc.RootElement.GetProperty("waiting").GetInt32() == 1) {
-					rs = reqStat.Queued;
-					rt = doc.RootElement.GetProperty("queue_position").GetInt32();
-                } else if (doc.RootElement.GetProperty("processing").GetInt32() == 1) {
-                    rs = reqStat.Processing;
-					rt = doc.RootElement.GetProperty("wait_time").GetInt32();
-				} else if (doc.RootElement.GetProperty("finished").GetInt32() == 1) {
-                    rs = reqStat.Idle;
-					break;
+				try {
+					if (doc.RootElement.GetProperty("waiting").GetInt32() == 1) {
+						rs = reqStat.Queued;
+						rt = doc.RootElement.GetProperty("queue_position").GetInt32();
+					} else if (doc.RootElement.GetProperty("processing").GetInt32() == 1) {
+						rs = reqStat.Processing;
+						rt = doc.RootElement.GetProperty("wait_time").GetInt32();
+					} else if (doc.RootElement.GetProperty("finished").GetInt32() == 1) {
+						rs = reqStat.Idle;
+						break;
+					} else {
+						rs = reqStat.Idle;
+						return "";
+					}
 				}
+				catch (Exception ex) { }
             }
 
             return doc.RootElement.GetProperty("generations")[0].GetProperty("text").GetString();
@@ -186,8 +196,8 @@ namespace ExprChatAvalonia {
 		public static async Task<string> GenerateExpression() {
 			if (icons.Count == 0) return "";
 			string msg = Regex.Matches(context, $"{story.charName}: (.*)").Last().Groups[1].Value;
-			// make exprTask a template and only replace the variable parts right here
-			return await KoboldCppGen($"{context}\n</conversation>\n\n\n{exprTask.Replace("[MESSAGE]", msg)}", useHorde ? "" : memory, 8, 0.0, gbnf);
+			string tsk = exprTask.Replace("{char}", story.charName).Replace("{expr}", string.Join(", ", icons.Keys)).Replace("{msg}", msg);
+			return await KoboldCppGen($"{context}\n</conversation>\n\n{tsk}", useHorde ? "" : memory, 8, 0.0, gbnf);
 		}
 
 		public static async Task<string> GetLocalModel() {
@@ -251,6 +261,30 @@ namespace ExprChatAvalonia {
             return models;
         }
 
+		public static async Task KoboldAbort() {
+            using HttpClient client = new HttpClient();
+            var payload = new JsonObject {
+                ["genkey"] = "KCPP7370"
+            };
+
+            string jsonPayload = payload.ToJsonString();
+            StringContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            await client.PostAsync("http://localhost:5001/api/extra/abort", httpContent);
+        }
+
+		public static async Task HordeCancel() {
+            using HttpClient client = new HttpClient();
+            HttpRequestMessage cancelRequest = new HttpRequestMessage(HttpMethod.Delete, $"https://aihorde.net/api/v2/generate/text/status/{jobID}");
+            cancelRequest.Headers.Add("Client-Agent", "ExprChat:1");
+            await client.SendAsync(cancelRequest);
+        }
+
+		public static async void CancelGen() {
+			if (useHorde) HordeCancel();
+			else KoboldAbort();
+		}
+
         public static void AppendUserMsg(string dialog, string action) {
 			context += $"\n{story.userName}: ";
 			if (dialog.Length > 0) context += dialog; else context += "...";
@@ -276,8 +310,6 @@ namespace ExprChatAvalonia {
 				gbnf += $@"""{k}""";
 			}
 			gbnf += ")";
-
-			exprTask = $"### Instruction\nDetermine {story.charName}'s latest facial expression, based on their last response.\nPossible expressions: [{string.Join(", ", icons.Keys)}]\n\n### Response\nFor {story.charName} saying \"[MESSAGE]\", the most fitting expression is \"";
 		}
 
 		public static void AssembleMemory() {
@@ -288,8 +320,6 @@ namespace ExprChatAvalonia {
 			if (chatTask.Length > 0) memory += $"<system>\n{chatTask}\n</system>\n\n";
 			if (story.examples.Length > 0) memory += $"<examples>\n{story.examples}\n</examples>\n\n";
 			memory += "<conversation>\n";
-
-			exprTask = $"### Instruction\nDetermine {story.charName}'s latest facial expression, based on their last response.\nPossible expressions: [{string.Join(", ", icons.Keys)}]\n\n### Response\nFor {story.charName} saying \"[MESSAGE]\", the most fitting expression is \"";
 		}
 	}
 }

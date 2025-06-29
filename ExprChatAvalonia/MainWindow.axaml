@@ -8,7 +8,7 @@
 		Width="1080" Height="768"
 		ExtendClientAreaToDecorationsHint="True">
 	<Grid RowDefinitions="auto, *, auto">
-		<TextBlock Height="32" LineHeight="32" Padding="16,0,0,0" Background="#333" Foreground="#ccc" PointerPressed="TextBlock_PointerPressed" Text="Expressive Chat"/>
+		<TextBlock Height="32" LineHeight="32" Padding="16,0,0,0" Background="#4888" Foreground="#888" PointerPressed="TextBlock_PointerPressed" Text="Expressive Chat"/>
 		
 		<TabControl Name="TabControlPages" Grid.Row="1" Margin="32, 0" Padding="0, 32" SelectionChanged="TabControl_SelectionChanged">
 			<TabItem Header="💬 Chat" Cursor="Hand">
@@ -32,8 +32,8 @@
 				<Grid RowDefinitions="*, auto" RowSpacing="16">
 					<TextBox Name="TextBoxContext" AcceptsReturn="True" Watermark="Chat history..." TextWrapping="WrapWithOverflow" TextChanged="TextBoxContext_TextChanged"/>
 					<StackPanel Grid.Row="1" Orientation="Horizontal" FlowDirection="RightToLeft" Spacing="8">
-						<Button Name="ButtonGen" Content="Continue" Click="ButtonGen_Click"/>
-						<Button Name="ButtonRegen" Content="Retry" Click="ButtonRegen_Click"/>
+						<Button Name="ButtonGen" Content="Continue" Cursor="Hand" Click="ButtonGen_Click"/>
+						<Button Name="ButtonRegen" Content="Retry" Cursor="Hand" Click="ButtonRegen_Click"/>
 					</StackPanel>
 				</Grid>
 			</TabItem>
@@ -57,52 +57,52 @@
 				<ScrollViewer MaxWidth="1080">
 					<Grid ColumnDefinitions="*, 150, 0.1*, *, 150" RowDefinitions="auto, auto, auto, auto, auto, auto, auto, auto" ColumnSpacing="16" RowSpacing="8">
 						<TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Text="Context size" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderContext" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Minimum="512" Maximum="8192" Value="4096" SmallChange="512" LargeChange="1024" TickPlacement="BottomRight" TickFrequency="512" IsSnapToTickEnabled="True" ValueChanged="SliderContext_ValueChanged"/>
+						<Slider Name="SliderContext" Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" Minimum="512" Maximum="8192" Value="4096" SmallChange="512" LargeChange="1024" TickPlacement="BottomRight" TickFrequency="512" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderContext_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownContext" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Minimum="512" Maximum="8192" Value="4096" Increment="512" ValueChanged="NumericUpDownContext_ValueChanged"/>
 						<TextBlock Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2" Text="Output length" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderOutput" Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Minimum="32" Maximum="256" Value="64" SmallChange="32" LargeChange="64" TickPlacement="BottomRight" TickFrequency="32" IsSnapToTickEnabled="True" ValueChanged="SliderOutput_ValueChanged"/>
+						<Slider Name="SliderOutput" Grid.Column="3" Grid.Row="1" VerticalAlignment="Center" Minimum="32" Maximum="256" Value="64" SmallChange="32" LargeChange="64" TickPlacement="BottomRight" TickFrequency="32" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderOutput_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownOutput" Grid.Column="4" Grid.Row="1" VerticalAlignment="Center" Minimum="32" Maximum="256" Value="64" Increment="32" ValueChanged="NumericUpDownOutput_ValueChanged"/>
 						<TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Text="Temperature" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderTemp" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0.3" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderTemp_ValueChanged"/>
+						<Slider Name="SliderTemp" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0.3" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderTemp_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownTemp" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0.3" Increment="0.1" ValueChanged="NumericUpDownTemp_ValueChanged"/>
 						<TextBlock Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2" Text="Repetition penalty" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderRepPen" Grid.Column="3" Grid.Row="3" VerticalAlignment="Center" Minimum="1" Maximum="2" Value="1.1" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderRepPen_ValueChanged"/>
+						<Slider Name="SliderRepPen" Grid.Column="3" Grid.Row="3" VerticalAlignment="Center" Minimum="1" Maximum="2" Value="1.1" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderRepPen_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownRepPen" Grid.Column="4" Grid.Row="3" VerticalAlignment="Center" Minimum="1" Maximum="2" Value="1.1" Increment="0.1" ValueChanged="NumericUpDownRepPen_ValueChanged"/>
 						<TextBlock Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Text="Top-P sampling" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderTopP" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="1" Value="0.9" SmallChange="0.05" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="SliderTopP_ValueChanged"/>
+						<Slider Name="SliderTopP" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="1" Value="0.9" SmallChange="0.05" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.05" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderTopP_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownTopP" Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="1" Value="0.9" Increment="0.05" ValueChanged="NumericUpDownTopP_ValueChanged"/>
 						<TextBlock Grid.Column="3" Grid.Row="4" Grid.ColumnSpan="2" Text="Top-K sampling" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderTopK" Grid.Column="3" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="100" SmallChange="5" LargeChange="10" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderTopK_ValueChanged"/>
+						<Slider Name="SliderTopK" Grid.Column="3" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="100" SmallChange="5" LargeChange="10" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderTopK_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownTopK" Grid.Column="4" Grid.Row="5" VerticalAlignment="Center" Minimum="0" Maximum="100" Value="100" Increment="5" ValueChanged="NumericUpDownTopK_ValueChanged"/>
 						<TextBlock Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2" Text="Top N Sigma" FontSize="20" Padding="0, 32, 0, 0"/>
-						<Slider Name="SliderNSigma" Grid.Column="0" Grid.Row="7" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderNSigma_ValueChanged"/>
+						<Slider Name="SliderNSigma" Grid.Column="0" Grid.Row="7" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0" SmallChange="0.1" LargeChange="0.2" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" Cursor="Hand" ValueChanged="SliderNSigma_ValueChanged"/>
 						<NumericUpDown Name="NumericUpDownNSigma" Grid.Column="1" Grid.Row="7" VerticalAlignment="Center" Minimum="0" Maximum="2" Value="0" Increment="0.1" ValueChanged="NumericUpDownNSigma_ValueChanged"/>
 					</Grid>
 				</ScrollViewer>
 			</TabItem>
 			<TabItem Header="⚙ Settings" Cursor="Hand">
-				<ScrollViewer MaxWidth="768">
-					<StackPanel Spacing="16">
+				<ScrollViewer MaxWidth="800">
+					<StackPanel Spacing="16" Margin="16,0">
 						<Grid ColumnDefinitions="*, *" RowDefinitions="auto, auto, auto" RowSpacing="16" Margin="0, 32, 0, 0">
 							<TextBlock Grid.Row="0" Text="Portraits folder" FontSize="20"/>
-							<Button Grid.Row="0" Grid.Column="1" Content="Select" FontSize="20" HorizontalAlignment="Right" MinWidth="100" HorizontalContentAlignment="Center" Click="ButtonFolder_Click"/>
+							<Button Grid.Row="0" Grid.Column="1" Content="Select" FontSize="20" HorizontalAlignment="Right" MinWidth="100" HorizontalContentAlignment="Center" Cursor="Hand" Click="ButtonFolder_Click"/>
 							<TextBlock Grid.Row="1" Text="Selected character" FontSize="20"/>
-							<ComboBox Name="ComboBoxChar" Grid.Row="1" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" MinWidth="100" IsEnabled="False" PlaceholderForeground="Gray" SelectionChanged="ComboBoxChar_SelectionChanged"/>
+							<ComboBox Name="ComboBoxChar" Grid.Row="1" Grid.Column="1" FontSize="20" HorizontalAlignment="Right" MinWidth="100" IsEnabled="False" PlaceholderForeground="Gray" Cursor="Hand" SelectionChanged="ComboBoxChar_SelectionChanged"/>
 							<TextBlock Name="TextBlockIcons" Grid.Row="2" Grid.ColumnSpan="2" FontSize="16" TextWrapping="WrapWithOverflow" Foreground="Gray"/>
 						</Grid>
-						<Border Height="64"/>
+						<Border Height="48"/>
 						<TextBlock Text="API Provider" FontSize="20"/>
 						<TabControl Name="TabControlProvider" TabStripPlacement="Left">
-							<TabItem Header="Local">
+							<TabItem Header="Local" Cursor="Hand">
 								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" VerticalAlignment="Top">
 									<TextBlock Name="TextBlockLocal" FontSize="20" Foreground="Gray" Margin="16"/>
 								</Border>
 							</TabItem>
-							<TabItem Header="AI Horde">
+							<TabItem Header="AI Horde" Cursor="Hand">
 								<Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
 									<Grid ColumnDefinitions="160, *" RowDefinitions="*, *, *" RowSpacing="16" Margin="16">
 										<TextBlock Grid.Row="0" Text="Selected model" FontSize="20"/>
-										<ComboBox Name="ComboBoxModel" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" MinWidth="320" SelectionChanged="ComboBoxModel_SelectionChanged" PlaceholderText="Select model..." PlaceholderForeground="Gray" AutoScrollToSelectedItem="True">
+										<ComboBox Name="ComboBoxModel" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" MinWidth="320" Cursor="Hand" SelectionChanged="ComboBoxModel_SelectionChanged" PlaceholderText="Select model..." PlaceholderForeground="Gray" AutoScrollToSelectedItem="True">
 											<ComboBox.Styles>
 												<Style Selector="ComboBoxItem">
 													<Setter Property="Width" Value="320"/>
@@ -118,6 +118,15 @@
 								</Border>
 							</TabItem>
 						</TabControl>
+						<Border Height="48"/>
+						<Grid ColumnDefinitions="*, *">
+							<TextBlock Text="UI Theme" FontSize="20"/>
+							<TabStrip Name="TabStripTheme" Grid.Column="1" HorizontalAlignment="Right" Cursor="Hand" SelectionChanged="TabStripTheme_SelectionChanged">
+								<TabStripItem>System</TabStripItem>
+								<TabStripItem>Light</TabStripItem>
+								<TabStripItem>Dark</TabStripItem>
+							</TabStrip>
+						</Grid>
 					</StackPanel>
 				</ScrollViewer>
 			</TabItem>

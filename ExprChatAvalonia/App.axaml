@@ -5,7 +5,12 @@
 			 <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
 	<Application.Styles>
-		<FluentTheme/>
+		<FluentTheme>
+			<FluentTheme.Palettes>
+				<ColorPaletteResources x:Key="Light" RegionColor="#eee" />
+				<ColorPaletteResources x:Key="Dark" RegionColor="#111" />
+			</FluentTheme.Palettes>
+		</FluentTheme>
 		<Style Selector="Window">
 			<Setter Property="FontFamily" Value="Bahnschrift"/>
 		</Style>

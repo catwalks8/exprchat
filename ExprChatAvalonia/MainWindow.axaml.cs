@@ -69,11 +69,32 @@ namespace ExprChatAvalonia
 			TextBoxContext.Text = Chat.context;
 		}
 
-		private void toggleButtonControls(bool enable) {
-			ButtonSend.IsEnabled = enable;
-			ButtonRetry.IsEnabled = enable;
-			ButtonGen.IsEnabled = enable;
-			ButtonRegen.IsEnabled = enable;
+		private void toggleButtonControls(byte state) {
+			switch (state) {
+				case 1: {
+					ButtonSend.IsEnabled = true;
+					ButtonGen.IsEnabled = true;
+					ButtonRetry.IsEnabled = true;
+					ButtonRegen.IsEnabled = true;
+					ButtonSend.Content = "Send 🔼";
+					ButtonGen.Content = "Continue";
+                    break;
+				}
+				case 2: {
+                    ButtonRetry.IsEnabled = false;
+                    ButtonRegen.IsEnabled = false;
+                    ButtonSend.Content = Chat.useHorde ? "Cancel ❌" : "Abort ❌";
+                    ButtonGen.Content = Chat.useHorde ? "Cancel ❌" : "Abort ❌";
+                    break;
+                }
+				case 0: {
+                    ButtonSend.IsEnabled = false;
+                    ButtonGen.IsEnabled = false;
+                    ButtonRetry.IsEnabled = false;
+                    ButtonRegen.IsEnabled = false;
+                    break;
+                }
+			}
 		}
 
 		private void toggleInputControls(bool enable) {
@@ -128,10 +149,16 @@ namespace ExprChatAvalonia
         }
 
         private async void ButtonSend_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
+			if (Chat.rs != Chat.reqStat.Idle) {
+				toggleButtonControls(0);
+				try { Chat.CancelGen(); } catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); }
+				return;
+			}
+
 			if ((TextBoxInput.Text ?? "").Length + (TextBoxInputAct.Text ?? "").Length == 0) return;
 			if (Chat.useHorde && Chat.model.Length == 0) { InfoBox("Please select a model for AI Horde inference.", "No model"); return; }
 
-			toggleButtonControls(false);
+			toggleButtonControls(2);
 			toggleInputControls(false);
 			UpdateStatus();
 			
@@ -150,12 +177,18 @@ namespace ExprChatAvalonia
 			}
 			ImageChar.Opacity = 1.0;
 
-			toggleButtonControls(true);
+			toggleButtonControls(1);
 			toggleInputControls(true);
 		}
 
 		private async void ButtonRetry_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
-			toggleButtonControls(false);
+            if (Chat.rs != Chat.reqStat.Idle) {
+                toggleButtonControls(0);
+                try { Chat.CancelGen(); } catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); }
+                return;
+            }
+
+            toggleButtonControls(2);
             UpdateStatus();
 
             try { await Chat.RetryResponse(); }
@@ -172,25 +205,39 @@ namespace ExprChatAvalonia
 			}
 			ImageChar.Opacity = 1.0;
 
-			toggleButtonControls(true);
+			toggleButtonControls(1);
 		}
 
 		private async void ButtonGen_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
-			toggleButtonControls(false);
+            if (Chat.rs != Chat.reqStat.Idle) {
+                toggleButtonControls(0);
+                try { Chat.CancelGen(); } catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); }
+                return;
+            }
+
+            toggleButtonControls(2);
             UpdateStatus();
-            try { await Chat.GenerateResponse(); }
+			try { await Chat.GenerateResponse(); }
 			catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); Chat.rs = Chat.reqStat.Idle; }
 			UpdateContext();
-			toggleButtonControls(true);
+			if (TabControlPages.SelectedIndex == 0) UpdateDialog(true);
+			toggleButtonControls(1);
 		}
 
 		private async void ButtonRegen_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e) {
-			toggleButtonControls(false);
+            if (Chat.rs != Chat.reqStat.Idle) {
+                toggleButtonControls(0);
+                try { Chat.CancelGen(); } catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); }
+                return;
+            }
+
+            toggleButtonControls(2);
             UpdateStatus();
             try { await Chat.RetryResponse(); }
 			catch (Exception ex) { InfoBox(ex.Message, "An exception occured"); Chat.rs = Chat.reqStat.Idle; }
 			UpdateContext();
-			toggleButtonControls(true);
+            if (TabControlPages.SelectedIndex == 0) UpdateDialog(true);
+            toggleButtonControls(1);
 		}
 
 		private void TextBoxInput_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e) {
@@ -357,6 +404,14 @@ namespace ExprChatAvalonia
 			if (e.Source is null) return;
 			if (modelNames.Count == 0 || ComboBoxModel?.SelectedIndex is null || ComboBoxModel.SelectedIndex < 0 || ComboBoxModel.SelectedIndex >= modelNames.Count) return;
 			Chat.model = modelNames[ComboBoxModel.SelectedIndex];
+        }
+
+        private void TabStripTheme_SelectionChanged(object? sender, Avalonia.Controls.SelectionChangedEventArgs e) {
+			switch(TabStripTheme?.SelectedIndex) {
+				case 0: { RequestedThemeVariant = ThemeVariant.Default; break; }
+				case 1: { RequestedThemeVariant = ThemeVariant.Light; break; }
+				case 2: { RequestedThemeVariant = ThemeVariant.Dark; break; }
+			}
         }
     }
 }
